@@ -132,7 +132,7 @@ public:
 
     // Transfer-Encoding: chunked
     int handleFileRequest(int fd, const std::string &filePath, std::string Connection);
-    int continueFileTransfer(int fd);
+    int continueFileTransfer(int fd, std::string filePath);
     void setnonblocking(int fd);
     static std::map<std::string, std::string> key_value_pair(std::string header);
 
