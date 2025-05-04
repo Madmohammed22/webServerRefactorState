@@ -3,7 +3,7 @@
 
 template <typename T>
 
-bool header_parser(T method,Request &request, std::string header, std::map<std::string, std::string> tmpMap)
+bool header_parser(T method, Request &request, std::string header, std::map<std::string, std::string> tmpMap)
 {
     Build build;
     std::ofstream *file = request.state.file;
@@ -67,7 +67,9 @@ bool Server::validateHeader(int fd, FileTransferState &state)
                 std::cout << "Invalid Header" << std::endl;
                 return false;
             }
-            request[fd].Data();
+            std::cout << "-------( REQUEST PARSED )-------\n\n";
+            std::cout << request[fd].header << std::endl;
+            std::cout << "-------( END OF REQUEST )-------\n\n\n";
             request[fd].state.isComplete = true;
         }
         else if (state.header.find("POST") != std::string::npos)
@@ -79,6 +81,9 @@ bool Server::validateHeader(int fd, FileTransferState &state)
                 std::cout << "Invalid Header" << std::endl;
                 return false;
             }
+            std::cout << "-------( REQUEST PARSED )-------\n\n";
+            std::cout << request[fd].header << std::endl;
+            std::cout << "-------( END OF REQUEST )-------\n\n\n";
             request[fd].Data();
         }
         else if (state.header.find("DELETE") != std::string::npos)
@@ -89,6 +94,10 @@ bool Server::validateHeader(int fd, FileTransferState &state)
                 std::cout << "Invalid Header" << std::endl;
                 return false;
             }
+            std::cout << "-------( REQUEST PARSED )-------\n\n";
+            std::cout << request[fd].header << std::endl;
+            std::cout << "-------( END OF REQUEST )-------\n\n\n";
+            request[fd].state.isComplete = true;
         }
         else if (state.header.find("PUT") != std::string::npos || state.header.find("PATCH") != std::string::npos || state.header.find("HEAD") != std::string::npos || state.header.find("OPTIONS") != std::string::npos)
         {

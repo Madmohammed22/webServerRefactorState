@@ -6,7 +6,7 @@ void DELETE::buildFileTransfers()
     state.filePath = Server::parseSpecificRequest(request.header);
     state.offset = 0;
     state.fileSize = Server::getFileSize(PATHC + state.filePath);
-    state.isComplete = false;    
+    state.isComplete = false;
     state.isValidHeader = false;
     // state.stopConnection = 0;
 }
@@ -171,37 +171,25 @@ int DELETE(std::string request)
     return EXIT_SUCCESS;
 }
 
-int Server::handle_delete_request(int fd, Server *server, std::string rqst)
+int Server::handle_delete_request(int fd)
 {
-    // std::cout << "-------( REQUEST PARSED )-------\n\n";
-    // server->key_value_pair_header(fd, server, ft_parseRequest_T(fd, server, request).first);
-    // std::cout << "-------( END OF REQUEST )-------\n\n\n";
-
-    std::pair<std::string, std::string> pair_request = ft_parseRequest_T(fd, server, rqst);
-    FileTransferState state;
-    server->request[fd].connection = server->request[fd].state.mapOnHeader.find("Connection:")->second;
-    server->request[fd].state = state;
-    std::string filePath = parseSpecificRequest(rqst);
-    if (server->canBeOpen(filePath))
+    std::string filePath = request[fd].state.filePath;
+    if (canBeOpen(filePath))
     {
         if (filePath.at(0) != '/')
             filePath = "/" + filePath;
-        if (server->getFileType(filePath) == 1)
-        {
+        if (getFileType(filePath) == 1)
             deleteDirectoryContents(filePath.c_str());
-        }
 
         if (DELETE(filePath) == -1)
-        {
-            return server->request.erase(fd), close(fd), std::cerr << "Failed to delete file or directory: " << filePath << std::endl, 0;
-        }
-        std::string httpResponse = server->deleteHttpResponse(server);
+            return request.erase(fd), close(fd), std::cerr << "Failed to delete file or directory: " << filePath << std::endl, 0;
+        std::string httpResponse = deleteHttpResponse(this);
         if (send(fd, httpResponse.c_str(), httpResponse.length(), MSG_NOSIGNAL) == -1)
         {
             std::cerr << "Failed to send HTTP header." << std::endl;
-            return server->request.erase(fd), close(fd), 0;
+            return request.erase(fd), close(fd), 0;
         }
-        return server->request.erase(fd), close(fd), 0;
+        return request.erase(fd), close(fd), 0;
     }
-    return getSpecificRespond(fd, server, "404.html", server->createNotFoundResponse);
+    return getSpecificRespond(fd, this, "404.html", createNotFoundResponse);
 }

@@ -7,8 +7,6 @@
 
 struct FileTransferState
 {
-    // int stopConnection;
-
     std::string filePath;
     size_t offset;
     size_t fileSize;

@@ -24,7 +24,6 @@ void GET::buildFileTransfers()
     state.uriLength = state.filePath.length();
     state.test = 0;
     state.last_activity_time = time(NULL);
-    // state.stopConnection = 0;
 }
 
 void GET::buildMethod()

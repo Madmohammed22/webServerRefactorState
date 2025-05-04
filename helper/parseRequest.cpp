@@ -9,10 +9,14 @@ void Server::printfContentHeader(Server *server, int fd)
         it++;
     }
 }
+
 std::string Server::parseSpecificRequest(std::string request)
 {
-    std::string filePath = "/index.html";
-    
+    std::string filePath;
+    if (searchOnSpecificFile(PATHC, "index.html") == true)
+        filePath = "/index.html";
+    else
+        filePath = "undefined";
     // Handle GET requests
     size_t startPos = request.find("GET /");
     if (startPos != std::string::npos)
@@ -136,7 +140,7 @@ bool Server::searchOnSpecificFile(std::string path, std::string fileTarget)
 {
     DIR *dir = opendir(path.c_str());
     if (!dir)
-        return perror("opendir"),  false;
+        return perror("opendir"), false;
     struct dirent *dr;
     while ((dr = readdir(dir)))
     {
