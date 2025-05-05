@@ -58,7 +58,11 @@ int Server::getFileType(std::string path)
 
 std::string Server::createChunkedHttpResponse(std::string contentType)
 {
-    return "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "; charset=utf-8" + "\r\nTransfer-Encoding: chunked\r\n\r\n";
+    std::ostringstream oss;
+    oss << "HTTP/1.1 200 OK\r\n"
+        << "Content-Type: " + contentType + "; charset=utf-8" + "\r\n"
+        << "Transfer-Encoding: chunked\r\n\r\n";
+    return oss.str();
 }
 
 std::string Server::httpResponse(std::string contentType, size_t contentLength)

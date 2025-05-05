@@ -12,6 +12,7 @@ bool header_parser(T method, Request &request, std::string header, std::map<std:
     build.buildRequest(method);
     if (!build.buildRequest_valid(method))
     {
+        // request.exit_from_what = "410";
         return false;
     }
     methaData = method.getRequest();
@@ -58,9 +59,6 @@ bool Server::validateHeader(int fd, FileTransferState &state)
 
         if (state.header.find("GET") != std::string::npos)
         {
-            std::cout << "---(header)------" << std::endl;
-            std::cout << state.header.to_string() << std::endl;
-            std::cout << "---(header)------" << std::endl;
             GET get;
             if (header_parser(get, request[fd], state.header.to_string(), tmpMap) == false)
             {

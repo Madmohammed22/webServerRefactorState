@@ -13,10 +13,10 @@ void Server::printfContentHeader(Server *server, int fd)
 std::string Server::parseSpecificRequest(std::string request)
 {
     std::string filePath;
-    if (searchOnSpecificFile(PATHC, "index.html") == true)
-        filePath = "/index.html";
-    else
-        filePath = "undefined";
+    filePath = "/index.html";
+    // if (searchOnSpecificFile(PATHC, "index.html") == true)
+    // else
+    //     filePath = "undefined";
     // Handle GET requests
     size_t startPos = request.find("GET /");
     if (startPos != std::string::npos)

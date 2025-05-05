@@ -14,53 +14,47 @@
 #define SERVER_HPP
 
 #include "request.hpp"
-#include <time.h>
-#include <bits/types.h>
-#include "server.hpp"
-#include <unistd.h>
-#include <iomanip>
-#include <filesystem>
-#include <dirent.h>
-#include <cstring>
-#include <sstream>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <cstdlib>
-#include <map>
-#include <stack>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <poll.h>
-#include <sys/epoll.h>
-#include <fcntl.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sys/stat.h>
-#include <errno.h>
-#include <string.h>
-#include <set>
-#include <algorithm>
-#include "request.hpp"
-#include "Binary_String.hpp"
 #include "globalInclude.hpp"
 
-#define ERROR404 404
-#define ERROR405 405
-#define SUCCESS 200
+class CONFIG
+{
+    int port;
+    int maxevents;
+    int chunksize;
+    int timeout;
+    int timeoutms;
+    std::string pathc;
+    std::string pathe; 
+    std::string pathu; 
+    std::string test; 
 
-#define PORT 8080
-#define MAX_EVENTS 1024
-#define CHUNK_SIZE 1024
-#define TIMEOUT 600
-#define TIMEOUTMS 30000
-#define PATHC "root/content/"
-#define PATHE "root/error/"
-#define PATHU "root/UPLOAD"
-#define STATIC "root/static/"
-#define TEST "root/test/"
+
+public :
+    CONFIG(const CONFIG& conf) {
+        this->port = conf.port;
+        this->maxevents = conf.maxevents;
+        this->chunksize = conf.chunksize;
+        this->timeout = conf.timeout;
+        this->timeoutms = conf.timeoutms;
+
+        this->pathc = conf.pathc;
+        this->pathe = conf.pathe;
+        this->pathu = conf.pathu;
+        this->test = conf.test;
+    }
+public:
+    void set_port(int port) { this->port = port; };
+    void set_maxevents(int maxevents) { this->maxevents = maxevents; };
+    void set_chunksize(int chunksize) { this->chunksize = chunksize; };
+    void set_timeout(int timeout) { this->timeout = timeout; };
+    void set_timeoutms(int timeoutms) { this->timeoutms = timeoutms; };
+
+public:
+    void set_pathc(std::string pathc) { this->pathc = pathc; };
+    void set_pathe(std::string pathe) { this->pathe = pathe; };
+    void set_pathu(std::string pathu) { this->pathu = pathu; };
+    void set_test(std::string test) { this->test = test; };
+};
 
 class Binary_String;
 class Request;
@@ -82,6 +76,7 @@ public:
 public:
     // Map to keep track of file in for each client
     std::map<int, Request> request;
+    std::map<int, struct CONFIG> multiServers;
     int establishingServer();
 
 public:

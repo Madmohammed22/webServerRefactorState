@@ -1,6 +1,7 @@
 #ifndef GLOBALINCLUDE_HPP
 #define GLOBALINCLUDE_HPP
 
+
 #include "request.hpp"
 #include <time.h>
 #include <bits/types.h>
@@ -62,6 +63,23 @@
 #include <set>
 #include <algorithm>
 #include "Binary_String.hpp"
+
+#define ERROR404 404
+#define ERROR405 405
+#define SUCCESS 200
+
+#define PORT 8080
+#define MAX_EVENTS 1024
+#define CHUNK_SIZE 1024
+#define TIMEOUT 600
+#define TIMEOUTMS 30000
+#define MAXURI 1000
+#define PATHC "/root/content/"
+#define PATHE "root/error/"
+#define PATHU "root/UPLOAD"
+#define STATIC "root/static/"
+#define TEST "root/test/"
+
 
 struct Multipart
 {

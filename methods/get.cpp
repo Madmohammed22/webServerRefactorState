@@ -157,7 +157,7 @@ bool Server::canBeOpen(std::string &filePath)
     else if (filePath.at(0) != '/' && getFileType("/" + filePath) == 1)
         return true;
     else
-    {
+    {   
         // new_path = STATIC + filePath;
         new_path = TEST + filePath;
         // new_path = PATHC + filePath;
@@ -192,6 +192,7 @@ bool sendFinalChunk(int fd)
 
 int Server::continueFileTransfer(int fd, std::string filePath)
 {
+    canBeOpen(filePath);
     char buffer[CHUNK_SIZE];
     size_t remainingBytes = request[fd].state.fileSize - request[fd].state.offset;
     size_t bytesToRead;
@@ -224,7 +225,10 @@ int Server::continueFileTransfer(int fd, std::string filePath)
             return 0;
         }
         if (request[fd].getConnection() == "close")
+        {
+            request[fd].state.test = 0;
             return close(fd), request.erase(fd), 0;
+        }
         request[fd].state.test = 0;
     }
     return 0;
@@ -237,7 +241,18 @@ int Server::handleFileRequest(int fd, const std::string &filePath, std::string C
     request[fd].state.fileSize = fileSize;
     const size_t LARGE_FILE_THRESHOLD = 1024 * 1024;
 
-    if (request[fd].getTransferEncoding() == "undefined" && !(fileSize > LARGE_FILE_THRESHOLD))
+    if (fileSize > LARGE_FILE_THRESHOLD)
+    {
+        std::string httpRespons = createChunkedHttpResponse(contentType);
+        if (send(fd, httpRespons.c_str(), httpRespons.length(), MSG_NOSIGNAL) == -1)
+        {
+
+            return std::cerr << "Failed to send chunked HTTP header." << std::endl, 0;
+        }
+        request[fd].state.test = 1;
+        return continueFileTransfer(fd, filePath);
+    }
+    else
     {
         std::string httpRespons = httpResponse(contentType, fileSize);
         if (send(fd, httpRespons.c_str(), httpRespons.length(), MSG_NOSIGNAL) == -1)
@@ -253,24 +268,12 @@ int Server::handleFileRequest(int fd, const std::string &filePath, std::string C
         }
 
         if (Connection == "close")
-        {
             return close(fd), request.erase(fd), 0;
-        }
         else
         {
             close(fd), request.erase(fd);
         }
         return 0;
-    }
-    else if ((fileSize > LARGE_FILE_THRESHOLD) || (request[fd].getTransferEncoding() == "chunked"))
-    {
-        request[fd].state.test = 1;
-        std::string httpRespons = createChunkedHttpResponse(contentType);
-        if (send(fd, httpRespons.c_str(), httpRespons.length(), MSG_NOSIGNAL) == -1)
-        {
-            return std::cerr << "Failed to send chunked HTTP header." << std::endl, -1;
-        }
-        return continueFileTransfer(fd, filePath);
     }
     return 0;
 }
@@ -290,19 +293,19 @@ int Server::serve_file_request(int fd)
 {
     std::string Connection = request[fd].connection;
     std::string filePath = request[fd].state.filePath;
-    if (request[fd].state.test == 1)
-    {
-        if (canBeOpen(filePath) && continueFileTransfer(fd, filePath) == -1)
-            return std::cerr << "Failed to continue file transfer" << std::endl, request.erase(fd), close(fd), 0;
-        return 0;
-    }
 
     if (canBeOpen(filePath) && getFileType(filePath) == 2)
     {
+        if (request[fd].state.test == 1)
+        {
+            if (continueFileTransfer(fd, filePath) == -1)
+                return std::cerr << "Failed to continue file transfer" << std::endl, request.erase(fd), close(fd), 0;
+            return 0;
+        }
         return handleFileRequest(fd, filePath, Connection);
     }
     else
-    {
+    { 
         return getSpecificRespond(fd, this, "404.html", createNotFoundResponse);
     }
     return 0;
@@ -313,7 +316,6 @@ bool Server::closeConnection(int fd)
     if (request[fd].state.isComplete == true)
     {
         time_t current_time = time(NULL);
-        std::cout << "[" << current_time << "]" << std::endl;
         if (current_time - request[fd].state.last_activity_time > TIMEOUT)
         {
             std::cerr << "Client " << fd << " timed out." << "[getSpecificRespond]" << std::ends;

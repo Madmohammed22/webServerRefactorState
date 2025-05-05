@@ -36,14 +36,6 @@ Server &Server::operator=(const Server &Init)
 
 Server::~Server()
 {
-    // for (std::map<int, Request>::iterator it = request.begin(); it != request.end(); ++it)
-    // {
-    //     if (it->second.file)
-    //     {
-    //         it->second.file->close();
-    //         delete it->second.file;
-    //     }
-    // }
     request.clear();
     if (close(listen_sock) == -1)
         std::cerr << "Failed to close listen socket" << std::endl;

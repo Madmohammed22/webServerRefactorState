@@ -213,7 +213,13 @@ public:
 public:
     bool validate(RequstBuilder &builder)
     {
-        (void)builder;
+        std::string method = builder.getRequest().getMethod();
+        if (method == "GET" || method == "POST" || method == "DELETE"){
+            if (builder.getRequest().state.uriLength > MAXURI){
+                
+                return false;
+            }
+        }
         return true;
     }
     HeaderValidator *getNextValidator()
@@ -233,7 +239,7 @@ public:
     {
         if (builder.getRequest().getMethod() == "GET")
         {
-            return builder.getRequest().getTransferEncoding() == "chunked" ||
+            return builder.getRequest().getTransferEncoding() != "chunked" ||
                    builder.getRequest().getTransferEncoding() == "undefined";
         }
         else if (builder.getRequest().getMethod() == "POST")
@@ -332,7 +338,10 @@ public:
 public:
     bool validate(RequstBuilder &builder)
     {
-        return builder.getRequest().getConnection() == "close" || builder.getRequest().getConnection() == "keep-alive" || builder.getRequest().getConnection() == "undefined";
+        // this.
+        bool check = builder.getRequest().getConnection() == "close" || builder.getRequest().getConnection() == "keep-alive" || builder.getRequest().getConnection() == "undefined";
+        
+        return check;
     }
 
     HeaderValidator *getNextValidator()
@@ -379,7 +388,6 @@ public:
 
         for (std::vector<HeaderValidator *>::iterator it = validators.begin(); it != validators.end(); ++it)
         {
-            // return true;
             if (!(*it)->validate(requstBuilder))
             {
                 std::cout << "Request is invalid." << std::endl;
