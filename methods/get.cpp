@@ -44,41 +44,6 @@ void GET::buildFileTransfers()
     state.last_activity_time = time(NULL);
 }
 
-void GET::buildMethod()
-{
-    includeBuild("GET", request.method, 1);
-}
-
-void GET::buildConnection()
-{
-    includeBuild("Connection:", request.connection, 2);
-}
-
-void GET::buildTransferEncoding()
-{
-    includeBuild("Transfer-Encoding:", request.transferEncoding, 2);
-}
-
-void GET::buildContentLength()
-{
-    includeBuild("Content-Length:", request.contentLength, 2);
-}
-
-void GET::buildContentType()
-{
-    includeBuild("Content-Type:", request.ContentType, 2);
-}
-
-void GET::buildHost()
-{
-    includeBuild("Host:", request.host, 2);
-}
-
-void GET::buildAccept()
-{
-    includeBuild("Accept:", request.accept, 2);
-}
-
 std::ifstream::pos_type Server::getFileSize(const std::string &path)
 {
     std::ifstream file(path.c_str(), std::ios::binary | std::ios::ate);
@@ -143,6 +108,7 @@ bool sendFinalChunk(int fd)
 
 int Server::continueFileTransfer(int fd, std::string filePath)
 {
+    // return -1;
     canBeOpen(filePath);
     char buffer[CHUNK_SIZE];
     size_t remainingBytes = request[fd].state.fileSize - request[fd].state.offset;
@@ -193,12 +159,12 @@ int Server::handleFileRequest(int fd, const std::string &filePath, std::string C
 
     if (request[fd].state.fileSize > LARGE_FILE_THRESHOLD)
     {
+        request[fd].state.test = 1;
         std::string httpRespons = createChunkedHttpResponse(contentType);
         if (send(fd, httpRespons.c_str(), httpRespons.length(), MSG_NOSIGNAL) == -1)
         {
             return std::cerr << "Failed to send chunked HTTP header." << std::endl, 0;
         }
-        request[fd].state.test = 1;
         return continueFileTransfer(fd, filePath);
     }
     else
@@ -247,12 +213,12 @@ int Server::serve_file_request(int fd)
                 return std::cerr << "Failed to continue file transfer" << std::endl, request.erase(fd), close(fd), 0;
             return 0;
         }
-        return handleFileRequest(fd, filePath, Connection);
+        if (handleFileRequest(fd, filePath, Connection) == -1)
+            return close(fd), request.erase(fd), 0;
+        return 0;
     }
     else
-    {
         return getSpecificRespond(fd, this, "404.html", createNotFoundResponse);
-    }
     return 0;
 }
 

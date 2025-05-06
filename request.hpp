@@ -141,14 +141,14 @@ public:
 
 public:
     void includeBuild(std::string target, std::string &metaData, int pick);
-    void buildHost();
-    void buildAccept();
-    void buildMethod();
-    void buildContentType();
+    void buildHost() { includeBuild("Host:", request.host, 2); };
+    void buildAccept() { includeBuild("Accept:", request.accept, 2); };
+    void buildMethod() { includeBuild("GET", request.method, 1); };
+    void buildContentType() { includeBuild("Content-Type:", request.ContentType, 2); };
     void buildFileTransfers();
-    void buildConnection();
-    void buildTransferEncoding();
-    void buildContentLength();
+    void buildConnection() { includeBuild("Connection:", request.connection, 2); };
+    void buildTransferEncoding() { includeBuild("Transfer-Encoding:", request.transferEncoding, 2); };
+    void buildContentLength() { includeBuild("Content-Length:", request.contentLength, 2); };
 
     Request getRequest() const { return request; }
 };
@@ -165,14 +165,14 @@ public:
 
 public:
     void includeBuild(std::string target, std::string &metaData, int pick);
-    void buildHost();
-    void buildAccept();
-    void buildMethod();
-    void buildContentType();
+    void buildHost() { includeBuild("Host:", request.host, 2); };
+    void buildAccept() { includeBuild("Accept:", request.accept, 2); };
+    void buildMethod() { includeBuild("POST", request.method, 1); };
+    void buildContentType() { includeBuild("Content-Type:", request.ContentType, 2); };
     void buildFileTransfers();
-    void buildConnection();
-    void buildTransferEncoding();
-    void buildContentLength();
+    void buildConnection() { includeBuild("Connection:", request.connection, 2); };
+    void buildTransferEncoding() { includeBuild("Transfer-Encoding:", request.transferEncoding, 2); };
+    void buildContentLength() { includeBuild("Content-Length:", request.contentLength, 2); };
     Request getRequest() const { return request; }
 };
 
@@ -188,14 +188,14 @@ public:
 
 public:
     void includeBuild(std::string target, std::string &metaData, int pick);
-    void buildHost();
-    void buildAccept();
-    void buildMethod();
-    void buildContentType();
+    void buildHost() { includeBuild("Host:", request.host, 2); };
+    void buildAccept() { includeBuild("Accept:", request.accept, 2); };
+    void buildMethod() { includeBuild("DELETE", request.method, 1); };
+    void buildContentType() { includeBuild("Content-Type:", request.ContentType, 2); };
     void buildFileTransfers();
-    void buildConnection();
-    void buildTransferEncoding();
-    void buildContentLength();
+    void buildConnection() { includeBuild("Connection:", request.connection, 2); };
+    void buildTransferEncoding() { includeBuild("Transfer-Encoding:", request.transferEncoding, 2); };
+    void buildContentLength() { includeBuild("Content-Length:", request.contentLength, 2); };
     Request getRequest() const { return request; }
 };
 
@@ -343,7 +343,6 @@ public:
 public:
     bool validate(RequstBuilder &builder)
     {
-        std::cout << "[" << builder.getRequest().getConnection() << "]" << std::endl;
         bool check = builder.getRequest().getConnection() == "close" || builder.getRequest().getConnection() == "keep-alive" || builder.getRequest().getConnection() == "undefined";
 
         return check;

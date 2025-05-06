@@ -29,40 +29,5 @@ void POST::buildFileTransfers()
     state.uriLength = state.filePath.length();
     state.test = 0;
     state.headerFlag = true;
-    // state.stopConnection = 0;
 }
 
-void POST::buildMethod()
-{
-    includeBuild("POST", request.method, 1);
-}
-
-void POST::buildConnection()
-{
-    includeBuild("Connection:", request.connection, 2);
-}
-
-void POST::buildTransferEncoding()
-{
-    includeBuild("Transfer-Encoding:", request.transferEncoding, 2);
-}
-
-void POST::buildContentLength()
-{
-    includeBuild("Content-Length:", request.contentLength, 2);
-}
-
-void POST::buildContentType()
-{
-    includeBuild("Content-Type:", request.ContentType, 2);
-}
-
-void POST::buildHost()
-{
-    includeBuild("Host:", request.host, 2);
-}
-
-void POST::buildAccept()
-{
-    includeBuild("Accept:", request.accept, 2);
-}

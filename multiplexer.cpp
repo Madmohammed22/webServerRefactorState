@@ -76,10 +76,18 @@ int Server::handleClientConnections()
             FileTransferState &state = request[fd].state;
             if (state.isComplete)
             {
-                if (request[fd].method == "GET")
+                switch (request[fd].method[0])
+                {
+                case 'G':
                     serve_file_request(fd);
-                else if (request[fd].method == "DELETE")
+                    break;
+                case 'D':
                     handle_delete_request(fd);
+                    break;
+                default:
+                    continue;
+                    ;
+                }
             }
         }
     }

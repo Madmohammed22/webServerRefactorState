@@ -26,42 +26,6 @@ void DELETE::buildFileTransfers()
     state.fileSize = Server::getFileSize(PATHC + state.filePath);
     state.isComplete = false;
     state.isValidHeader = false;
-    // state.stopConnection = 0;
-}
-
-void DELETE::buildMethod()
-{
-    includeBuild("DELETE", request.method, 1);
-}
-
-void DELETE::buildConnection()
-{
-    includeBuild("Connection:", request.connection, 2);
-}
-
-void DELETE::buildTransferEncoding()
-{
-    includeBuild("Transfer-Encoding:", request.transferEncoding, 2);
-}
-
-void DELETE::buildContentLength()
-{
-    includeBuild("Content-Length:", request.contentLength, 2);
-}
-
-void DELETE::buildContentType()
-{
-    includeBuild("Content-Type:", request.ContentType, 2);
-}
-
-void DELETE::buildHost()
-{
-    includeBuild("Host:", request.host, 2);
-}
-
-void DELETE::buildAccept()
-{
-    includeBuild("Accept:", request.accept, 2);
 }
 
 void deleteDirectoryContents(const std::string &dir)
