@@ -18,7 +18,8 @@ void GET::includeBuild(std::string target, std::string &metaData, int pick)
     std::map<std::string, std::string>::iterator it = request.keys.find(target);
     if (it != request.keys.end())
     {
-        if (Server::containsOnlyWhitespace(it->second) == false){
+        if (Server::containsOnlyWhitespace(it->second) == false)
+        {
             if (pick == 1)
                 metaData = it->first;
             else

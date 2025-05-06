@@ -76,7 +76,7 @@ int Server::handleClientConnections()
             FileTransferState &state = request[fd].state;
             if (state.isComplete)
             {
-                switch (request[fd].method[0])
+                switch (request[fd].getMethod()[0])
                 {
                 case 'G':
                     serve_file_request(fd);
