@@ -13,6 +13,24 @@
 #include "../server.hpp"
 #include "../request.hpp"
 
+void GET::includeBuild(std::string target, std::string &metaData, int pick)
+{
+    std::map<std::string, std::string>::iterator it = request.keys.find(target);
+    if (it != request.keys.end())
+    {
+        if (Server::containsOnlyWhitespace(it->second) == false){
+            if (pick == 1)
+                metaData = it->first;
+            else
+                metaData = it->second;
+        }
+        else
+            metaData = "empty";
+        return;
+    }
+    metaData = "undefined";
+}
+
 void GET::buildFileTransfers()
 {
     FileTransferState &state = request.state;
@@ -28,100 +46,37 @@ void GET::buildFileTransfers()
 
 void GET::buildMethod()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("GET");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.method = it->first;
-        else
-            request.method = "empty";
-        return;
-    }
-    request.method = "undefined";
+    includeBuild("GET", request.method, 1);
 }
 
 void GET::buildConnection()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Connection:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.connection = it->second;
-        else
-            request.connection = "empty";
-        return;
-    }
-    request.connection = "keep-alive";
+    includeBuild("Connection:", request.connection, 2);
 }
 
 void GET::buildTransferEncoding()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Transfer-Encoding:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.transferEncoding = it->second;
-        else
-            request.transferEncoding = "empty";
-        return;
-    }
-    request.transferEncoding = "undefined";
+    includeBuild("Transfer-Encoding:", request.transferEncoding, 2);
 }
 
 void GET::buildContentLength()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Content-Length:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.contentLength = it->second;
-        else
-            request.contentLength = "empty";
-        return;
-    }
-    request.contentLength = "undefined";
+    includeBuild("Content-Length:", request.contentLength, 2);
 }
 
 void GET::buildContentType()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Content-Type:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.ContentType = it->second;
-        else
-            request.ContentType = "empty";
-        return;
-    }
-    request.ContentType = "undefined";
+    includeBuild("Content-Type:", request.ContentType, 2);
 }
 
 void GET::buildHost()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Host:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.host = it->second;
-        else
-            request.host = "empty";
-        return;
-    }
-    request.host = "undefined";
+    includeBuild("Host:", request.host, 2);
 }
 
 void GET::buildAccept()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Accept:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.accept = it->second;
-        else
-            request.accept = "empty";
-        return;
-    }
-    request.accept = "undefined";
+    includeBuild("Accept:", request.accept, 2);
 }
 
 std::ifstream::pos_type Server::getFileSize(const std::string &path)
@@ -157,11 +112,7 @@ bool Server::canBeOpen(std::string &filePath)
     else if (filePath.at(0) != '/' && getFileType("/" + filePath) == 1)
         return true;
     else
-    {   
-        // new_path = STATIC + filePath;
         new_path = TEST + filePath;
-        // new_path = PATHC + filePath;
-    }
     std::ifstream file(new_path.c_str());
     if (!file.is_open())
         return std::cerr << "" << std::ends, false;
@@ -237,16 +188,14 @@ int Server::continueFileTransfer(int fd, std::string filePath)
 int Server::handleFileRequest(int fd, const std::string &filePath, std::string Connection)
 {
     std::string contentType = request[fd].state.mime;
-    size_t fileSize = getFileSize(filePath);
-    request[fd].state.fileSize = fileSize;
+    request[fd].state.fileSize = getFileSize(filePath);
     const size_t LARGE_FILE_THRESHOLD = 1024 * 1024;
 
-    if (fileSize > LARGE_FILE_THRESHOLD)
+    if (request[fd].state.fileSize > LARGE_FILE_THRESHOLD)
     {
         std::string httpRespons = createChunkedHttpResponse(contentType);
         if (send(fd, httpRespons.c_str(), httpRespons.length(), MSG_NOSIGNAL) == -1)
         {
-
             return std::cerr << "Failed to send chunked HTTP header." << std::endl, 0;
         }
         request[fd].state.test = 1;
@@ -254,25 +203,21 @@ int Server::handleFileRequest(int fd, const std::string &filePath, std::string C
     }
     else
     {
-        std::string httpRespons = httpResponse(contentType, fileSize);
+        std::string httpRespons = httpResponse(contentType, request[fd].state.fileSize);
         if (send(fd, httpRespons.c_str(), httpRespons.length(), MSG_NOSIGNAL) == -1)
             return std::cerr << "Failed to send HTTP header." << std::endl, -1;
-        char buffer[fileSize];
+        char buffer[request[fd].state.fileSize];
         size_t bytesRead = 0;
-        if (!readFileChunk(filePath, buffer, 0, fileSize, bytesRead))
+        if (!readFileChunk(filePath, buffer, 0, request[fd].state.fileSize, bytesRead))
             return std::cerr << "Failed to read file: " << filePath << std::endl, 0;
 
         if (send(fd, buffer, bytesRead, MSG_NOSIGNAL) == -1)
-        {
             return close(fd), request.erase(fd), 0;
-        }
 
         if (Connection == "close")
             return close(fd), request.erase(fd), 0;
         else
-        {
             close(fd), request.erase(fd);
-        }
         return 0;
     }
     return 0;
@@ -305,7 +250,7 @@ int Server::serve_file_request(int fd)
         return handleFileRequest(fd, filePath, Connection);
     }
     else
-    { 
+    {
         return getSpecificRespond(fd, this, "404.html", createNotFoundResponse);
     }
     return 0;

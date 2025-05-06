@@ -1,5 +1,23 @@
 #include "../server.hpp"
 
+void POST::includeBuild(std::string target, std::string &metaData, int pick)
+{
+    std::map<std::string, std::string>::iterator it = request.keys.find(target);
+    if (it != request.keys.end())
+    {
+        if (Server::containsOnlyWhitespace(it->second) == false){
+            if (pick == 1)
+                metaData = it->first;
+            else
+                metaData = it->second;
+        }
+        else
+            metaData = "empty";
+        return;
+    }
+    metaData = "undefined";
+}
+
 void POST::buildFileTransfers()
 {
     FileTransferState &state = request.state;
@@ -16,98 +34,35 @@ void POST::buildFileTransfers()
 
 void POST::buildMethod()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("POST");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.method = it->first;
-        else
-            request.method = "empty";
-        return;
-    }
-    request.method = "undefined";
+    includeBuild("POST", request.method, 1);
 }
 
 void POST::buildConnection()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Connection:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.connection = it->second;
-        else
-            request.connection = "empty";
-        return;
-    }
-    request.connection = "keep-alive";
+    includeBuild("Connection:", request.connection, 2);
 }
 
 void POST::buildTransferEncoding()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Transfer-Encoding:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.transferEncoding = it->second;
-        else
-            request.transferEncoding = "empty";
-        return;
-    }
-    request.transferEncoding = "undefined";
+    includeBuild("Transfer-Encoding:", request.transferEncoding, 2);
 }
 
 void POST::buildContentLength()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Content-Length:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.contentLength = it->second;
-        else
-            request.contentLength = "empty";
-        return;
-    }
-    request.contentLength = "undefined";
+    includeBuild("Content-Length:", request.contentLength, 2);
 }
 
 void POST::buildContentType()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Content-Type:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.ContentType = it->second;
-        else
-            request.ContentType = "empty";
-        return;
-    }
-    request.ContentType = "undefined";
+    includeBuild("Content-Type:", request.ContentType, 2);
 }
 
 void POST::buildHost()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Host:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.host = it->second;
-        else
-            request.host = "empty";
-        return;
-    }
-    request.host = "undefined";
+    includeBuild("Host:", request.host, 2);
 }
 
 void POST::buildAccept()
 {
-    std::map<std::string, std::string>::iterator it = request.keys.find("Accept:");
-    if (it != request.keys.end())
-    {
-        if (Server::containsOnlyWhitespace(it->second) == false)
-            request.accept = it->second;
-        else
-            request.accept = "empty";
-        return;
-    }
-    request.accept = "undefined";
+    includeBuild("Accept:", request.accept, 2);
 }

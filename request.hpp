@@ -16,7 +16,7 @@ struct FileTransferState
     std::string mime;
     int uriLength;
     int test;
-    
+
     Binary_String header;
     time_t last_activity_time;
     std::string fileType;
@@ -25,7 +25,7 @@ struct FileTransferState
     int headerFlag;
     std::ofstream *file;
     bool isCompleteShortFile;
-    
+
     int bytesReceived;
     Binary_String buffer;
     int flag;
@@ -140,6 +140,7 @@ public:
     GET(Request req) { this->request = req; }
 
 public:
+    void includeBuild(std::string target, std::string &metaData, int pick);
     void buildHost();
     void buildAccept();
     void buildMethod();
@@ -163,6 +164,7 @@ public:
     POST(Request req) { this->request = req; }
 
 public:
+    void includeBuild(std::string target, std::string &metaData, int pick);
     void buildHost();
     void buildAccept();
     void buildMethod();
@@ -185,6 +187,7 @@ public:
     DELETE(Request req) { this->request = req; }
 
 public:
+    void includeBuild(std::string target, std::string &metaData, int pick);
     void buildHost();
     void buildAccept();
     void buildMethod();
@@ -214,9 +217,11 @@ public:
     bool validate(RequstBuilder &builder)
     {
         std::string method = builder.getRequest().getMethod();
-        if (method == "GET" || method == "POST" || method == "DELETE"){
-            if (builder.getRequest().state.uriLength > MAXURI){
-                
+        if (method == "GET" || method == "POST" || method == "DELETE")
+        {
+            if (builder.getRequest().state.uriLength > MAXURI)
+            {
+
                 return false;
             }
         }
@@ -338,9 +343,9 @@ public:
 public:
     bool validate(RequstBuilder &builder)
     {
-        // this.
+        std::cout << "[" << builder.getRequest().getConnection() << "]" << std::endl;
         bool check = builder.getRequest().getConnection() == "close" || builder.getRequest().getConnection() == "keep-alive" || builder.getRequest().getConnection() == "undefined";
-        
+
         return check;
     }
 
